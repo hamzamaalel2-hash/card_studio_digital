@@ -3,91 +3,61 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Digital Card Studio - Admin</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;padding:20px;background:#101010;color:#f5d78e;
- font-family:Arial,sans-serif
-}
-.container{max-width:900px;margin:auto}
-.panel{
- background:#1b1b1b;border:1px solid #b99448;
- border-radius:12px;padding:22px;margin:18px 0
-}
-h1,h2{color:#d8b56b}
-input:not([type=checkbox]){
- width:100%;padding:12px;margin:7px 0 14px;
- border:1px solid #8d713b;border-radius:7px;
- background:#101010;color:white
-}
-label{display:block;margin-top:8px}
-button{
- padding:11px 16px;margin:5px;border:0;border-radius:7px;
- background:#c5a15a;color:#111;font-weight:bold;cursor:pointer
-}
-button.secondary{background:#444;color:white}
+body{margin:0;background:#101010;color:#f5f5f5;font-family:Arial,sans-serif;padding:20px}
+.container{max-width:950px;margin:auto}
+h1,h2{color:#d5ad55}
+.card{background:#1c1c1c;border:1px solid #40351f;border-radius:14px;padding:20px;margin:18px 0}
+input{width:100%;padding:12px;margin:7px 0 14px;border:1px solid #555;border-radius:8px;background:#292929;color:white}
+input[type=checkbox],input[type=file]{width:auto}
+label{color:#d5ad55;font-size:14px}
+button{padding:11px 16px;border:0;border-radius:8px;background:#d5ad55;color:#111;font-weight:bold;cursor:pointer;margin:5px 3px}
 button.danger{background:#a83232;color:white}
-.client{
- border:1px solid #5d4a28;border-radius:8px;
- padding:14px;margin:12px 0;overflow-wrap:anywhere
-}
-.hidden{display:none!important}
-.status{color:#fff;margin:12px 0}
-.hint{color:#bbb;font-size:13px}
-a{color:#e4c47e}
-#qrModal{
- position:fixed;inset:0;background:#000e;z-index:1000;
- display:flex;align-items:center;justify-content:center;padding:15px
-}
-.qrBox{
- background:#1b1b1b;border:1px solid #c5a15a;
- border-radius:15px;padding:25px;text-align:center;
- width:100%;max-width:350px
-}
-#qrCode{
- background:white;padding:15px;display:inline-block;
- margin:15px auto;min-width:250px;min-height:250px
-}
-#qrCode img,#qrCode canvas{max-width:100%;height:auto}
-#qrLink{overflow-wrap:anywhere;font-size:12px;color:#ddd}
+button.secondary{background:#444;color:white}
+.client{border-bottom:1px solid #444;padding:15px 0}
+.client strong{color:#d5ad55}
+small{color:#bbb}
+#status{margin:12px 0;color:#d5ad55;white-space:pre-wrap}
+#app{display:none}
+#qrModal{display:none;position:fixed;inset:0;background:#000d;align-items:center;justify-content:center;padding:20px}
+#qrBox{background:white;color:#111;padding:25px;border-radius:12px;text-align:center;max-width:340px;width:100%}
+#qrcode{display:flex;justify-content:center;margin:15px}
+#qrcode img{max-width:100%}
 </style>
 </head>
-
 <body>
 <div class="container">
-<h1>Digital Card Studio</h1>
-<p>Administration des cartes digitales</p>
+<h1>✦ DIGITAL CARD STUDIO</h1>
 
-<section id="loginPanel" class="panel">
+<div id="login" class="card">
 <h2>Connexion Admin</h2>
 <label>Email</label>
 <input id="loginEmail" type="email" placeholder="Votre email">
 <label>Mot de passe</label>
 <input id="loginPassword" type="password" placeholder="Votre mot de passe">
-<button onclick="login()">Se connecter</button>
-<p id="loginStatus" class="status"></p>
-</section>
-
-<section id="dashboard" class="hidden">
-
-<div class="panel">
-<h2>Gestion des clients</h2>
-<button class="secondary" onclick="logout()">Déconnexion</button>
-<button onclick="newCard()">Nouvelle carte</button>
-<p id="mainStatus" class="status"></p>
+<button onclick="loginAdmin()">Se connecter</button>
+<div id="loginStatus"></div>
 </div>
 
-<div class="panel">
-<h2 id="formTitle">Ajouter une carte</h2>
-<input type="hidden" id="clientId">
+<div id="app">
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+<h2>Gestion des cartes</h2>
+<button class="secondary" onclick="logoutAdmin()">Déconnexion</button>
+</div>
+<button onclick="newCard()">+ Ajouter un client</button>
+</div>
 
-<label>Nom complet</label>
+<div class="card">
+<h2 id="formTitle">Nouvelle carte</h2>
+<input type="hidden" id="client_id">
+
+<label>Nom complet *</label>
 <input id="full_name" placeholder="Nom du client">
 
 <label>Nom du commerce</label>
@@ -96,26 +66,30 @@ a{color:#e4c47e}
 <label>Fonction</label>
 <input id="job_title" placeholder="Ex: Gérant">
 
-<label>Identifiant du lien (slug)</label>
-<input id="slug" placeholder="Ex: restaurant-sousse">
+<label>Lien personnalisé (slug) *</label>
+<input id="slug" placeholder="ex: hamza">
 
-<label>Photo URL</label>
+<label>Photo depuis votre ordinateur</label>
+<input id="photo_file" type="file" accept="image/*">
+<small>Image JPG, PNG ou WEBP — maximum 5 Mo.</small>
+
+<label>Photo URL (optionnel)</label>
 <input id="photo_url" placeholder="Lien de la photo">
 
 <label>Téléphone</label>
-<input id="phone" placeholder="+216...">
+<input id="phone" placeholder="+216 ...">
 
 <label>WhatsApp</label>
-<input id="whatsapp" placeholder="216...">
+<input id="whatsapp" placeholder="+216 ...">
 
 <label>Instagram</label>
-<input id="instagram" placeholder="Lien Instagram">
+<input id="instagram" placeholder="https://instagram.com/...">
 
 <label>Facebook</label>
-<input id="facebook" placeholder="Lien Facebook">
+<input id="facebook" placeholder="https://facebook.com/...">
 
 <label>TikTok</label>
-<input id="tiktok" placeholder="Lien TikTok">
+<input id="tiktok" placeholder="https://tiktok.com/@...">
 
 <label>Google Maps</label>
 <input id="maps_url" placeholder="Lien Google Maps">
@@ -124,271 +98,314 @@ a{color:#e4c47e}
 <input id="review_url" placeholder="Lien Google Review">
 
 <label>Email</label>
-<input id="email" type="email" placeholder="Email du client">
+<input id="email" type="email" placeholder="email@example.com">
 
-<label>Site Web</label>
+<label>Site web</label>
 <input id="website" placeholder="https://...">
 
-<label>
-<input id="is_published" type="checkbox" style="width:auto">
-Publier cette carte
+<label style="display:block;margin:10px 0">
+<input id="is_published" type="checkbox" checked>
+ Publier la carte
 </label>
 
-<button onclick="saveClient()">Enregistrer</button>
-<button class="secondary" onclick="newCard()">Vider le formulaire</button>
-
-<p id="formStatus" class="status"></p>
-<p class="hint">Les champs laissés vides ne seront pas affichés sur la carte publique.</p>
+<button onclick="saveClient()">Enregistrer la carte</button>
+<button class="secondary" onclick="newCard()">Nouveau</button>
+<div id="status"></div>
 </div>
 
-<div class="panel">
-<h2>Mes cartes</h2>
+<div class="card">
+<h2>Mes clients</h2>
 <div id="clientsList">Chargement...</div>
 </div>
-
-</section>
+</div>
 </div>
 
-<!-- Fenêtre QR Code -->
-<div id="qrModal" class="hidden">
- <div class="qrBox">
-  <h2>QR CODE CLIENT</h2>
-  <div id="qrCode"></div>
-  <p id="qrLink"></p>
-  <button onclick="downloadQR()">Télécharger PNG</button>
-  <button class="secondary" onclick="closeQR()">Fermer</button>
- </div>
+<div id="qrModal">
+<div id="qrBox">
+<h2>QR CODE</h2>
+<div id="qrcode"></div>
+<p id="qrLink" style="font-size:12px;word-break:break-all"></p>
+<button onclick="downloadQR()">Télécharger PNG</button>
+<button class="secondary" onclick="closeQR()">Fermer</button>
+</div>
 </div>
 
 <script>
 const SUPABASE_URL = "https://qgrrgvqeveqcusvzaump.supabase.co";
 const SUPABASE_KEY = "sb_publishable_MZaIjhV4gLUkOV4E9iZb0w_Y12deY0J";
-
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const fields = [
- "full_name","business_name","job_title","slug","photo_url",
- "phone","whatsapp","instagram","facebook","tiktok",
- "maps_url","review_url","email","website"
+"full_name","business_name","job_title","slug","photo_url",
+"phone","whatsapp","instagram","facebook","tiktok",
+"maps_url","review_url","email","website"
 ];
 
-let currentQRSlug = "";
+let currentQR = "";
 
-function showStatus(id,message){
- document.getElementById(id).textContent = message;
+function el(id){return document.getElementById(id)}
+
+function setStatus(message){
+  el("status").textContent = message;
 }
 
-async function login(){
- showStatus("loginStatus","Connexion...");
+async function loginAdmin(){
+  el("loginStatus").textContent = "Connexion...";
+  const email = el("loginEmail").value.trim();
+  const password = el("loginPassword").value;
 
- const email = document.getElementById("loginEmail").value.trim();
- const password = document.getElementById("loginPassword").value;
+  const {data,error} = await db.auth.signInWithPassword({email,password});
 
- const {error} = await db.auth.signInWithPassword({email,password});
-
- if(error){
-  showStatus("loginStatus","Erreur : "+error.message);
-  return;
- }
-
- document.getElementById("loginPanel").classList.add("hidden");
- document.getElementById("dashboard").classList.remove("hidden");
- await loadClients();
+  if(error){
+    el("loginStatus").textContent = "Erreur : " + error.message;
+    return;
+  }
+  showApp();
 }
 
-async function logout(){
- await db.auth.signOut();
- document.getElementById("dashboard").classList.add("hidden");
- document.getElementById("loginPanel").classList.remove("hidden");
- showStatus("loginStatus","Vous êtes déconnecté.");
+async function logoutAdmin(){
+  await db.auth.signOut();
+  el("app").style.display = "none";
+  el("login").style.display = "block";
+}
+
+async function showApp(){
+  el("login").style.display = "none";
+  el("app").style.display = "block";
+  await loadClients();
 }
 
 function newCard(){
- document.getElementById("clientId").value="";
- fields.forEach(id=>{
-  document.getElementById(id).value="";
- });
- document.getElementById("is_published").checked=false;
- document.getElementById("formTitle").textContent="Ajouter une carte";
- showStatus("formStatus","");
+  el("client_id").value = "";
+  fields.forEach(f => el(f).value = "");
+  el("photo_file").value = "";
+  el("is_published").checked = true;
+  el("formTitle").textContent = "Nouvelle carte";
+  setStatus("");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function uploadPhoto(file, slug){
+  if(!file) return null;
+
+  if(!file.type.startsWith("image/")){
+    throw new Error("Veuillez choisir une image.");
+  }
+
+  if(file.size > 5 * 1024 * 1024){
+    throw new Error("La photo ne doit pas dépasser 5 Mo.");
+  }
+
+  const extension = (file.name.split(".").pop() || "jpg")
+    .toLowerCase().replace(/[^a-z0-9]/g,"");
+
+  const safeSlug = (slug || "client").toLowerCase()
+    .replace(/[^a-z0-9-]/g,"-");
+
+  const path = safeSlug + "/" + Date.now() + "-" +
+    Math.random().toString(36).slice(2) + "." + extension;
+
+  const {error} = await db.storage
+    .from("client-photos")
+    .upload(path, file, {
+      contentType:file.type,
+      cacheControl:"3600",
+      upsert:false
+    });
+
+  if(error) throw error;
+
+  const {data} = db.storage
+    .from("client-photos")
+    .getPublicUrl(path);
+
+  return data.publicUrl;
 }
 
 async function saveClient(){
- const id=document.getElementById("clientId").value;
- const data={};
+  try{
+    setStatus("Enregistrement en cours...");
 
- fields.forEach(field=>{
-  data[field]=document.getElementById(field).value.trim();
- });
+    const id = el("client_id").value;
+    const slug = el("slug").value.trim();
 
- data.is_published=document.getElementById("is_published").checked;
+    if(!el("full_name").value.trim() || !slug){
+      setStatus("Veuillez remplir le nom et le lien personnalisé.");
+      return;
+    }
 
- if(!data.full_name || !data.slug){
-  showStatus("formStatus","Le nom et le slug sont obligatoires.");
-  return;
- }
+    const record = {};
+    fields.forEach(f => {
+      record[f] = el(f).value.trim();
+    });
 
- showStatus("formStatus","Enregistrement...");
+    record.slug = slug;
+    record.is_published = el("is_published").checked;
 
- let result;
+    const file = el("photo_file").files[0];
 
- if(id){
-  result=await db.from("clients").update(data).eq("id",id);
- }else{
-  result=await db.from("clients").insert([data]);
- }
+    if(file){
+      setStatus("Téléchargement de la photo...");
+      record.photo_url = await uploadPhoto(file, slug);
+      el("photo_url").value = record.photo_url;
+    }
 
- if(result.error){
-  showStatus("formStatus","Erreur : "+result.error.message);
-  return;
- }
+    setStatus("Sauvegarde de la carte...");
 
- showStatus("formStatus","Carte enregistrée avec succès.");
- newCard();
- await loadClients();
+    let result;
+
+    if(id){
+      result = await db.from("clients").update(record).eq("id",id);
+    }else{
+      result = await db.from("clients").insert([record]);
+    }
+
+    if(result.error) throw result.error;
+
+    setStatus("Carte enregistrée avec succès !");
+    newCard();
+    await loadClients();
+
+  }catch(error){
+    setStatus("Erreur : " + error.message);
+  }
 }
 
 async function loadClients(){
- showStatus("mainStatus","Chargement des cartes...");
+  el("clientsList").textContent = "Chargement...";
 
- const {data,error}=await db
-  .from("clients")
-  .select("*")
-  .order("created_at",{ascending:false});
+  const {data,error} = await db.from("clients")
+    .select("*")
+    .order("created_at",{ascending:false});
 
- if(error){
-  showStatus("mainStatus","Erreur : "+error.message);
-  return;
- }
+  if(error){
+    el("clientsList").textContent = "Erreur : " + error.message;
+    return;
+  }
 
- showStatus("mainStatus",data.length+" carte(s) trouvée(s).");
+  if(!data || data.length === 0){
+    el("clientsList").textContent = "Aucun client pour le moment.";
+    return;
+  }
 
- const list=document.getElementById("clientsList");
- list.innerHTML="";
+  el("clientsList").innerHTML = "";
 
- if(!data.length){
-  list.textContent="Aucune carte pour le moment.";
-  return;
- }
+  data.forEach(client => {
+    const url = window.location.origin +
+      window.location.pathname.replace("admin.html","") +
+      "?id=" + encodeURIComponent(client.slug);
 
- data.forEach(client=>{
-  const item=document.createElement("div");
-  item.className="client";
+    const div = document.createElement("div");
+    div.className = "client";
 
-  const name=document.createElement("strong");
-  name.textContent=client.full_name;
-  item.appendChild(name);
+    const title = document.createElement("strong");
+    title.textContent = client.full_name || "Sans nom";
 
-  const info=document.createElement("p");
-  info.textContent=client.business_name || "";
-  item.appendChild(info);
+    const details = document.createElement("div");
+    details.innerHTML = "<small></small>";
+    details.querySelector("small").textContent =
+      " — " + (client.business_name || "") +
+      " | " + (client.is_published ? "Publié" : "Non publié");
 
-  const status=document.createElement("p");
-  status.textContent=client.is_published ? "Publiée" : "Non publiée";
-  item.appendChild(status);
+    const link = document.createElement("p");
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.target = "_blank";
+    anchor.textContent = "Ouvrir la carte";
+    anchor.style.color = "#d5ad55";
+    link.appendChild(anchor);
 
-  const link=document.createElement("p");
-  const a=document.createElement("a");
-  a.href="./?id="+encodeURIComponent(client.slug);
-  a.target="_blank";
-  a.textContent="Ouvrir la carte";
-  link.appendChild(a);
-  item.appendChild(link);
+    const edit = document.createElement("button");
+    edit.textContent = "Modifier";
+    edit.onclick = () => editClient(client);
 
-  const qr=document.createElement("button");
-  qr.textContent="QR Code";
-  qr.onclick=()=>showQR(client.slug);
-  item.appendChild(qr);
+    const qr = document.createElement("button");
+    qr.textContent = "QR Code";
+    qr.onclick = () => showQR(url);
 
-  const edit=document.createElement("button");
-  edit.textContent="Modifier";
-  edit.onclick=()=>editClient(client);
-  item.appendChild(edit);
+    const del = document.createElement("button");
+    del.textContent = "Supprimer";
+    del.className = "danger";
+    del.onclick = () => deleteClient(client.id);
 
-  const del=document.createElement("button");
-  del.textContent="Supprimer";
-  del.className="danger";
-  del.onclick=()=>deleteClient(client.id);
-  item.appendChild(del);
-
-  list.appendChild(item);
- });
+    div.append(title,details,link,edit,qr,del);
+    el("clientsList").appendChild(div);
+  });
 }
 
 function editClient(client){
- document.getElementById("clientId").value=client.id;
+  el("client_id").value = client.id;
 
- fields.forEach(field=>{
-  document.getElementById(field).value=client[field] || "";
- });
+  fields.forEach(f => {
+    el(f).value = client[f] || "";
+  });
 
- document.getElementById("is_published").checked=!!client.is_published;
- document.getElementById("formTitle").textContent="Modifier la carte";
- showStatus("formStatus","Modification de : "+client.full_name);
- window.scrollTo({top:0,behavior:"smooth"});
+  el("photo_file").value = "";
+  el("is_published").checked = !!client.is_published;
+  el("formTitle").textContent = "Modifier la carte";
+  setStatus("Vous modifiez : " + client.full_name);
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 async function deleteClient(id){
- if(!confirm("Voulez-vous vraiment supprimer cette carte ?"))return;
+  if(!confirm("Voulez-vous vraiment supprimer cette carte ?")) return;
 
- const {error}=await db.from("clients").delete().eq("id",id);
+  const {error} = await db.from("clients").delete().eq("id",id);
 
- if(error){
-  showStatus("mainStatus","Erreur : "+error.message);
-  return;
- }
+  if(error){
+    alert("Erreur : " + error.message);
+    return;
+  }
 
- showStatus("mainStatus","Carte supprimée.");
- await loadClients();
+  alert("Carte supprimée.");
+  await loadClients();
 }
 
-/* QR CODE */
-function showQR(slug){
- currentQRSlug=slug;
+function showQR(url){
+  currentQR = url;
+  el("qrcode").innerHTML = "";
+  el("qrLink").textContent = url;
 
- const url="https://hamzamaalel2-hash.github.io/card_studio_digital/?id="+encodeURIComponent(slug);
+  new QRCode(el("qrcode"),{
+    text:url,
+    width:220,
+    height:220,
+    correctLevel:QRCode.CorrectLevel.H
+  });
 
- document.getElementById("qrCode").innerHTML="";
- document.getElementById("qrLink").textContent=url;
- document.getElementById("qrModal").classList.remove("hidden");
-
- new QRCode(document.getElementById("qrCode"),{
-  text:url,
-  width:250,
-  height:250,
-  colorDark:"#000000",
-  colorLight:"#ffffff",
-  correctLevel:QRCode.CorrectLevel.H
- });
+  el("qrModal").style.display = "flex";
 }
 
 function downloadQR(){
- const canvas=document.querySelector("#qrCode canvas");
+  const img = el("qrcode").querySelector("img");
+  const canvas = el("qrcode").querySelector("canvas");
 
- if(!canvas){
-  alert("Le QR Code n'est pas encore prêt. Réessayez.");
-  return;
- }
+  let dataUrl = "";
 
- const a=document.createElement("a");
- a.href=canvas.toDataURL("image/png");
- a.download="QR-"+currentQRSlug+".png";
- a.click();
+  if(img && img.src){
+    dataUrl = img.src;
+  }else if(canvas){
+    dataUrl = canvas.toDataURL("image/png");
+  }
+
+  if(!dataUrl){
+    alert("QR Code non disponible.");
+    return;
+  }
+
+  const a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = "QR-Code.png";
+  a.click();
 }
 
 function closeQR(){
- document.getElementById("qrModal").classList.add("hidden");
+  el("qrModal").style.display = "none";
 }
 
-(async function checkSession(){
- const {data}=await db.auth.getSession();
-
- if(data.session){
-  document.getElementById("loginPanel").classList.add("hidden");
-  document.getElementById("dashboard").classList.remove("hidden");
-  await loadClients();
- }
-})();
+db.auth.getSession().then(({data}) => {
+  if(data.session) showApp();
+});
 </script>
 </body>
 </html>
