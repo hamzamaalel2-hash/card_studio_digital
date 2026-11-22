@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Luxury Digital Card</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#080808;color:white;
+ font-family:Arial,sans-serif;
+ min-height:100vh;display:flex;
+ justify-content:center;align-items:center;
+ padding:20px;
+}
+.card{
+ width:100%;max-width:390px;
+ background:linear-gradient(145deg,#202020,#090909);
+ border:1px solid #c5a04b;
+ border-radius:25px;padding:30px 22px;
+ text-align:center;
+ box-shadow:0 0 30px #c5a04b25;
+}
+.logo{
+ width:110px;height:110px;border-radius:50%;
+ border:2px solid #d5b15c;object-fit:cover;
+}
+h1{color:#dfbd6a;margin-bottom:8px}
+p{color:#aaa}
+a{
+ display:block;text-decoration:none;
+ padding:15px;margin:12px 0;
+ border:1px solid #c5a04b;
+ color:#e2c16d;border-radius:12px;
+ font-weight:bold;
+}
+a:first-of-type{background:#c5a04b;color:#111}
+small{color:#777}
+</style>
+</head>
+<body>
+<div class="card">
+<img class="logo" id="photo"
+src="https://placehold.co/200x200/222222/d5b15c?text=LOGO">
+<h1 id="name">YOUR NAME</h1>
+<p id="job">Votre activité professionnelle</p>
+<a id="contact" href="#">Enregistrer le contact</a>
+<a id="whatsapp" href="#">WhatsApp</a>
+<a id="phone" href="#">Téléphone</a>
+<a id="instagram" href="#">Instagram</a>
+<a id="facebook" href="#">Facebook</a>
+<a id="maps" href="#">Localisation</a>
+<a id="review" href="#">Google Reviews</a>
+<small>CARTE DE VISITE DIGITALE</small>
+</div>
+<script>
+const clients={
+"client1":{
+name:"Ahmed",
+job:"Votre activité",
+phone:"+21620000000",
+whatsapp:"21620000000",
+instagram:"https://instagram.com/",
+facebook:"https://facebook.com/",
+maps:"https://maps.google.com/",
+review:"https://google.com/",
+photo:""
+}
+};
+const id=new URLSearchParams(location.search).get("id")||"client1";
+const c=clients[id]||clients.client1;
+document.getElementById("name").textContent=c.name;
+document.getElementById("job").textContent=c.job;
+if(c.photo)document.getElementById("photo").src=c.photo;
+document.getElementById("whatsapp").href="https://wa.me/"+c.whatsapp;
+document.getElementById("phone").href="tel:"+c.phone;
+document.getElementById("instagram").href=c.instagram;
+document.getElementById("facebook").href=c.facebook;
+document.getElementById("maps").href=c.maps;
+document.getElementById("review").href=c.review;
+document.getElementById("contact").href="data:text/vcard;charset=utf-8,"+
+encodeURIComponent("BEGIN:VCARD\nVERSION:3.0\nFN:"+c.name+
+"\nTEL:"+c.phone+"\nEND:VCARD");
+</script>
+</body>
+</html>
