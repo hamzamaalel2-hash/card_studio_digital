@@ -5,83 +5,209 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Luxury Digital Card</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 *{box-sizing:border-box}
+
 body{
- margin:0;background:#080808;color:white;
+ margin:0;
+ background:#080808;
+ color:white;
  font-family:Arial,sans-serif;
- min-height:100vh;display:flex;
- justify-content:center;align-items:center;
+ min-height:100vh;
+ display:flex;
+ justify-content:center;
+ align-items:center;
  padding:20px;
 }
+
 .card{
- width:100%;max-width:390px;
+ width:100%;
+ max-width:390px;
  background:linear-gradient(145deg,#202020,#090909);
  border:1px solid #c5a04b;
- border-radius:25px;padding:30px 22px;
+ border-radius:25px;
+ padding:30px 22px;
  text-align:center;
  box-shadow:0 0 30px #c5a04b25;
 }
+
 .logo{
- width:110px;height:110px;border-radius:50%;
- border:2px solid #d5b15c;object-fit:cover;
+ width:110px;
+ height:110px;
+ border-radius:50%;
+ border:2px solid #d5b15c;
+ object-fit:cover;
 }
+
 h1{color:#dfbd6a;margin-bottom:8px}
+h2{color:#d5b15c;font-size:16px;margin:5px}
 p{color:#aaa}
+
 a{
- display:block;text-decoration:none;
- padding:15px;margin:12px 0;
+ display:block;
+ text-decoration:none;
+ padding:15px;
+ margin:12px 0;
  border:1px solid #c5a04b;
- color:#e2c16d;border-radius:12px;
+ color:#e2c16d;
+ border-radius:12px;
  font-weight:bold;
 }
-a:first-of-type{background:#c5a04b;color:#111}
+
+a:first-of-type{
+ background:#c5a04b;
+ color:#111;
+}
+
 small{color:#777}
+.hidden{display:none!important}
+#status{color:#d5b15c;font-size:14px}
 </style>
 </head>
+
 <body>
+
 <div class="card">
+
 <img class="logo" id="photo"
-src="https://placehold.co/200x200/222222/d5b15c?text=LOGO">
-<h1 id="name">YOUR NAME</h1>
-<p id="job">Votre activité professionnelle</p>
-<a id="contact" href="#">Enregistrer le contact</a>
-<a id="whatsapp" href="#">WhatsApp</a>
-<a id="phone" href="#">Téléphone</a>
-<a id="instagram" href="#">Instagram</a>
-<a id="facebook" href="#">Facebook</a>
-<a id="maps" href="#">Localisation</a>
-<a id="review" href="#">Google Reviews</a>
+src="https://placehold.co/200x200/222222/d5b15c?text=LOGO"
+alt="Logo">
+
+<h1 id="name">Chargement...</h1>
+<h2 id="business"></h2>
+<p id="job"></p>
+
+<a id="contact" class="hidden">Enregistrer le contact</a>
+<a id="whatsapp" class="hidden">WhatsApp</a>
+<a id="phone" class="hidden">Téléphone</a>
+<a id="instagram" class="hidden">Instagram</a>
+<a id="facebook" class="hidden">Facebook</a>
+<a id="tiktok" class="hidden">TikTok</a>
+<a id="maps" class="hidden">Localisation</a>
+<a id="review" class="hidden">Google Reviews</a>
+<a id="email" class="hidden">Email</a>
+<a id="website" class="hidden">Site Web</a>
+
+<p id="status">Chargement de votre carte...</p>
+
 <small>CARTE DE VISITE DIGITALE</small>
+
 </div>
+
 <script>
-const clients={
-"client1":{
-name:"Ahmed",
-job:"Votre activité",
-phone:"+21620000000",
-whatsapp:"21620000000",
-instagram:"https://instagram.com/",
-facebook:"https://facebook.com/",
-maps:"https://maps.google.com/",
-review:"https://google.com/",
-photo:""
+const SUPABASE_URL = "https://qgrrgvqeveqcusvzaump.supabase.co";
+const SUPABASE_KEY = "sb_publishable_MZaIjhV4gLUkOV4E9iZb0w_Y12deY0J";
+
+const db = window.supabase.createClient(
+ SUPABASE_URL,
+ SUPABASE_KEY
+);
+
+function showLink(id, url) {
+ const el = document.getElementById(id);
+
+ if (!url || !url.trim()) {
+   el.classList.add("hidden");
+   return;
+ }
+
+ el.href = url;
+ el.classList.remove("hidden");
 }
-};
-const id=new URLSearchParams(location.search).get("id")||"client1";
-const c=clients[id]||clients.client1;
-document.getElementById("name").textContent=c.name;
-document.getElementById("job").textContent=c.job;
-if(c.photo)document.getElementById("photo").src=c.photo;
-document.getElementById("whatsapp").href="https://wa.me/"+c.whatsapp;
-document.getElementById("phone").href="tel:"+c.phone;
-document.getElementById("instagram").href=c.instagram;
-document.getElementById("facebook").href=c.facebook;
-document.getElementById("maps").href=c.maps;
-document.getElementById("review").href=c.review;
-document.getElementById("contact").href="data:text/vcard;charset=utf-8,"+
-encodeURIComponent("BEGIN:VCARD\nVERSION:3.0\nFN:"+c.name+
-"\nTEL:"+c.phone+"\nEND:VCARD");
+
+function cleanPhone(value) {
+ return (value || "").replace(/[^\d+]/g, "");
+}
+
+function escapeVcard(value) {
+ return (value || "")
+ .replace(/\\/g, "\\\\")
+ .replace(/\n/g, "\\n")
+ .replace(/,/g, "\\,")
+ .replace(/;/g, "\\;");
+}
+
+async function loadCard() {
+ const slug = new URLSearchParams(location.search).get("id");
+ const status = document.getElementById("status");
+
+ if (!slug) {
+   status.textContent = "Lien de carte invalide.";
+   document.getElementById("name").textContent = "Carte introuvable";
+   return;
+ }
+
+ const { data: c, error } = await db
+   .from("clients")
+   .select("*")
+   .eq("slug", slug)
+   .eq("is_published", true)
+   .maybeSingle();
+
+ if (error || !c) {
+   status.textContent = "Cette carte n'existe pas ou n'est pas publiée.";
+   document.getElementById("name").textContent = "Carte introuvable";
+   return;
+ }
+
+ document.getElementById("name").textContent = c.full_name || "";
+ document.getElementById("business").textContent = c.business_name || "";
+ document.getElementById("job").textContent = c.job_title || "";
+
+ if (c.photo_url) {
+   document.getElementById("photo").src = c.photo_url;
+ }
+
+ const phone = cleanPhone(c.phone);
+ const whatsapp = cleanPhone(c.whatsapp);
+
+ if (c.phone) {
+   showLink("phone", "tel:" + phone);
+ }
+
+ if (c.whatsapp) {
+   showLink("whatsapp", "https://wa.me/" + whatsapp.replace(/\D/g, ""));
+ }
+
+ if (c.instagram) showLink("instagram", c.instagram);
+ if (c.facebook) showLink("facebook", c.facebook);
+ if (c.tiktok) showLink("tiktok", c.tiktok);
+ if (c.maps_url) showLink("maps", c.maps_url);
+ if (c.review_url) showLink("review", c.review_url);
+
+ if (c.email) {
+   showLink("email", "mailto:" + c.email);
+ }
+
+ if (c.website) showLink("website", c.website);
+
+ if (c.full_name) {
+   const vcard = [
+     "BEGIN:VCARD",
+     "VERSION:3.0",
+     "FN:" + escapeVcard(c.full_name),
+     c.business_name ? "ORG:" + escapeVcard(c.business_name) : "",
+     c.job_title ? "TITLE:" + escapeVcard(c.job_title) : "",
+     c.phone ? "TEL;TYPE=CELL:" + c.phone : "",
+     c.email ? "EMAIL:" + c.email : "",
+     c.website ? "URL:" + c.website : "",
+     "END:VCARD"
+   ].filter(Boolean).join("\r\n");
+
+   const contact = document.getElementById("contact");
+   contact.href = "data:text/vcard;charset=utf-8," + encodeURIComponent(vcard);
+   contact.download = "contact.vcf";
+   contact.classList.remove("hidden");
+ }
+
+ status.classList.add("hidden");
+}
+
+loadCard();
 </script>
+
 </body>
 </html>
