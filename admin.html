@@ -1,0 +1,285 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Card Studio | Admin</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;padding:20px;background:#090909;color:#fff;
+ font-family:Arial,sans-serif
+}
+.container{max-width:650px;margin:auto}
+h1,h2{color:#d9b65e}
+.box{
+ background:#171717;border:1px solid #9d7b37;
+ border-radius:15px;padding:20px;margin:18px 0
+}
+input{
+ width:100%;padding:13px;margin:7px 0 14px;
+ border-radius:8px;border:1px solid #555;
+ background:#252525;color:white
+}
+label{color:#d9b65e;font-size:13px}
+button{
+ padding:12px 17px;border:0;border-radius:8px;
+ background:#c5a04b;color:#111;font-weight:bold;
+ cursor:pointer;margin:5px
+}
+.secondary{background:#333;color:white}
+.danger{background:#8e3030;color:white}
+.client{
+ padding:14px;background:#252525;
+ border-radius:10px;margin:10px 0
+}
+a{color:#e2c16d;overflow-wrap:anywhere}
+small{color:#aaa}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>✦ DIGITAL CARD STUDIO</h1>
+<p>Administration des cartes digitales</p>
+
+<div class="box" id="loginBox">
+<h2>Connexion Admin</h2>
+<label>Email</label>
+<input id="email" type="email" placeholder="Votre email">
+<label>Mot de passe</label>
+<input id="password" type="password" placeholder="Votre mot de passe">
+<button onclick="login()">Se connecter</button>
+<p id="loginMsg"></p>
+</div>
+
+<div id="dashboard" hidden>
+<div class="box">
+<h2>Nouvelle carte / Modifier</h2>
+<input id="editId" type="hidden">
+
+<label>Nom du client *</label>
+<input id="full_name" placeholder="Ahmed Ben Ali">
+
+<label>Nom du commerce</label>
+<input id="business_name" placeholder="Mon entreprise">
+
+<label>Activité</label>
+<input id="job_title" placeholder="Restaurant, salon...">
+
+<label>Identifiant du lien *</label>
+<input id="slug" placeholder="ahmed-restaurant">
+
+<label>Photo / Logo (URL)</label>
+<input id="photo_url" placeholder="https://...">
+
+<label>Téléphone</label>
+<input id="phone" placeholder="+216...">
+
+<label>WhatsApp (numéro avec indicatif)</label>
+<input id="whatsapp" placeholder="216...">
+
+<label>Instagram (lien)</label>
+<input id="instagram" placeholder="https://instagram.com/...">
+
+<label>Facebook (lien)</label>
+<input id="facebook" placeholder="https://facebook.com/...">
+
+<label>TikTok (lien)</label>
+<input id="tiktok" placeholder="https://tiktok.com/@...">
+
+<label>Google Maps (lien)</label>
+<input id="maps_url" placeholder="https://maps.app.goo.gl/...">
+
+<label>Google Reviews (lien)</label>
+<input id="review_url" placeholder="https://...">
+
+<label>Email professionnel</label>
+<input id="email_client" type="email" placeholder="contact@...">
+
+<label>Site web</label>
+<input id="website" placeholder="https://...">
+
+<label>
+<input id="is_published" type="checkbox" style="width:auto">
+ Publier la carte
+</label>
+<br><br>
+<button onclick="saveClient()">Enregistrer la carte</button>
+<button class="secondary" onclick="resetForm()">Nouveau client</button>
+<p id="message"></p>
+</div>
+
+<div class="box">
+<h2>Mes clients</h2>
+<div id="clients">Chargement...</div>
+</div>
+
+<button class="danger" onclick="logout()">Déconnexion</button>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL =
+"https://qgrrgvqeveqcusvzaump.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_MZaIjhV4gLUkOV4E9iZb0w_Y12deY0J";
+
+const db = window.supabase.createClient(
+ SUPABASE_URL, SUPABASE_KEY
+);
+
+const fields = [
+"full_name","business_name","job_title","slug",
+"photo_url","phone","whatsapp","instagram",
+"facebook","tiktok","maps_url","review_url",
+"email_client","website"
+];
+
+function showDashboard(show){
+ document.getElementById("loginBox").hidden=show;
+ document.getElementById("dashboard").hidden=!show;
+}
+
+async function login(){
+ const email=document.getElementById("email").value;
+ const password=document.getElementById("password").value;
+ const msg=document.getElementById("loginMsg");
+ msg.textContent="Connexion...";
+ const {error}=await db.auth.signInWithPassword({
+  email,password
+ });
+ if(error){msg.textContent=error.message;return;}
+ showDashboard(true);
+ loadClients();
+}
+
+async function logout(){
+ await db.auth.signOut();
+ showDashboard(false);
+}
+
+function resetForm(){
+ document.getElementById("editId").value="";
+ fields.forEach(f=>{
+  const el=document.getElementById(
+   f==="email_client"?"email_client":f
+  );
+  if(el)el.value="";
+ });
+ document.getElementById("is_published").checked=false;
+ document.getElementById("message").textContent="";
+}
+
+async function saveClient(){
+ const id=document.getElementById("editId").value;
+ const data={};
+
+ fields.forEach(f=>{
+  data[f]=document.getElementById(f).value.trim()||null;
+ });
+
+ if(!data.full_name||!data.slug){
+  document.getElementById("message").textContent=
+   "Le nom et le lien sont obligatoires.";
+  return;
+ }
+
+ data.is_published=
+  document.getElementById("is_published").checked;
+
+ const result=id
+  ? await db.from("clients").update(data).eq("id",id)
+  : await db.from("clients").insert(data);
+
+ if(result.error){
+  document.getElementById("message").textContent=
+   "Erreur: "+result.error.message;
+  return;
+ }
+
+ document.getElementById("message").textContent=
+  "Carte enregistrée avec succès !";
+ resetForm();
+ loadClients();
+}
+
+async function loadClients(){
+ const area=document.getElementById("clients");
+ area.textContent="Chargement...";
+
+ const {data,error}=await db.from("clients")
+  .select("*").order("created_at",{ascending:false});
+
+ if(error){area.textContent=error.message;return;}
+
+ area.replaceChildren();
+
+ if(!data.length){
+  area.textContent="Aucun client pour le moment.";
+  return;
+ }
+
+ data.forEach(c=>{
+  const card=document.createElement("div");
+  card.className="client";
+
+  const title=document.createElement("strong");
+  title.textContent=c.full_name+" — "+(c.business_name||"");
+  card.appendChild(title);
+
+  const status=document.createElement("p");
+  status.textContent=c.is_published?"Publié":"Non publié";
+  card.appendChild(status);
+
+  const link=document.createElement("a");
+  link.href="./?id="+encodeURIComponent(c.slug);
+  link.textContent="Lien : "+link.href;
+  link.target="_blank";
+  card.appendChild(link);
+
+  const edit=document.createElement("button");
+  edit.textContent="Modifier";
+  edit.onclick=()=>editClient(c);
+  card.appendChild(edit);
+
+  const del=document.createElement("button");
+  del.textContent="Supprimer";
+  del.className="danger";
+  del.onclick=()=>deleteClient(c.id);
+  card.appendChild(del);
+
+  area.appendChild(card);
+ });
+}
+
+function editClient(c){
+ document.getElementById("editId").value=c.id;
+ fields.forEach(f=>{
+  document.getElementById(f).value=c[f]||"";
+ });
+ document.getElementById("is_published").checked=
+  c.is_published;
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function deleteClient(id){
+ if(!confirm("Supprimer cette carte ?"))return;
+ const {error}=await db.from("clients").delete().eq("id",id);
+ if(error){alert(error.message);return;}
+ loadClients();
+}
+
+async function init(){
+ const {data}=await db.auth.getSession();
+ if(data.session){
+  showDashboard(true);
+  loadClients();
+ }
+}
+init();
+</script>
+</body>
+</html>
