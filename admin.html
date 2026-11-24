@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Digital Card Studio - Admin</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
@@ -41,14 +42,17 @@ small{color:#bbb}
 
 <body>
 <div class="container">
+
 <h1>✦ DIGITAL CARD STUDIO</h1>
 
 <div id="login" class="card">
 <h2>Connexion Admin</h2>
 <label>Email</label>
 <input id="loginEmail" type="email" placeholder="Votre email">
+
 <label>Mot de passe</label>
 <input id="loginPassword" type="password" placeholder="Votre mot de passe">
+
 <button onclick="loginAdmin()">Se connecter</button>
 <div id="loginStatus"></div>
 </div>
@@ -64,6 +68,7 @@ small{color:#bbb}
 </div>
 
 <div class="card">
+
 <h2 id="formTitle">Nouvelle carte</h2>
 <input type="hidden" id="client_id">
 
@@ -171,6 +176,7 @@ small{color:#bbb}
 
 <button onclick="saveClient()">Enregistrer la carte</button>
 <button class="secondary" onclick="newCard()">Nouveau</button>
+
 <div id="status"></div>
 </div>
 
@@ -193,17 +199,18 @@ small{color:#bbb}
 </div>
 
 <script>
-const SUPABASE_URL = "https://qgrrgvqeveqcusvzaump.supabase.co";
-const SUPABASE_KEY = "sb_publishable_MZaIjhV4gLUkOV4E9iZb0w_Y12deY0J";
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL="https://qgrrgvqeveqcusvzaump.supabase.co";
+const SUPABASE_KEY="sb_publishable_MZaIjhV4gLUkOV4E9iZb0w_Y12deY0J";
 
-const fields = [
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const fields=[
 "full_name","business_name","job_title","slug","photo_url",
 "phone","whatsapp","instagram","facebook","tiktok",
 "maps_url","review_url","email","website"
 ];
 
-const defaultColors = {
+const defaultColors={
 background_color:"#050505",
 card_color:"#101010",
 border_color:"#D4AF37",
@@ -214,61 +221,62 @@ accent_color:"#D4AF37",
 button_text_color:"#E9CD75"
 };
 
-const colorFields = Object.keys(defaultColors);
+const colorFields=Object.keys(defaultColors);
 
-let currentQR = "";
+let currentQR="";
 
 function el(id){
   return document.getElementById(id);
 }
 
 function setStatus(message){
-  el("status").textContent = message;
+  el("status").textContent=message;
 }
 
 function resetColors(){
   colorFields.forEach(field=>{
-    el(field).value = defaultColors[field];
+    el(field).value=defaultColors[field];
   });
 }
 
 async function loginAdmin(){
-  el("loginStatus").textContent = "Connexion...";
-  const email = el("loginEmail").value.trim();
-  const password = el("loginPassword").value;
+  el("loginStatus").textContent="Connexion...";
 
-  const {data,error} = await db.auth.signInWithPassword({email,password});
+  const email=el("loginEmail").value.trim();
+  const password=el("loginPassword").value;
+
+  const {data,error}=await db.auth.signInWithPassword({email,password});
 
   if(error){
-    el("loginStatus").textContent = "Erreur : " + error.message;
+    el("loginStatus").textContent="Erreur : "+error.message;
     return;
   }
 
-  showApp();
+  await showApp();
 }
 
 async function logoutAdmin(){
   await db.auth.signOut();
-  el("app").style.display = "none";
-  el("login").style.display = "block";
+  el("app").style.display="none";
+  el("login").style.display="block";
 }
 
 async function showApp(){
-  el("login").style.display = "none";
-  el("app").style.display = "block";
+  el("login").style.display="none";
+  el("app").style.display="block";
   await loadClients();
 }
 
 function newCard(){
-  el("client_id").value = "";
+  el("client_id").value="";
 
   fields.forEach(f=>{
-    el(f).value = "";
+    el(f).value="";
   });
 
-  el("photo_file").value = "";
-  el("is_published").checked = true;
-  el("formTitle").textContent = "Nouvelle carte";
+  el("photo_file").value="";
+  el("is_published").checked=true;
+  el("formTitle").textContent="Nouvelle carte";
 
   resetColors();
   setStatus("");
@@ -277,38 +285,36 @@ function newCard(){
 }
 
 async function uploadPhoto(file,slug){
-  if(!file) return null;
+  if(!file)return null;
 
   if(!file.type.startsWith("image/")){
     throw new Error("Veuillez choisir une image.");
   }
 
-  if(file.size > 5 * 1024 * 1024){
+  if(file.size>5*1024*1024){
     throw new Error("La photo ne doit pas dépasser 5 Mo.");
   }
 
-  const extension = (file.name.split(".").pop() || "jpg")
+  const extension=(file.name.split(".").pop()||"jpg")
     .toLowerCase().replace(/[^a-z0-9]/g,"");
 
-  const safeSlug = (slug || "client").toLowerCase()
+  const safeSlug=(slug||"client").toLowerCase()
     .replace(/[^a-z0-9-]/g,"-");
 
-  const path = safeSlug + "/" + Date.now() + "-" +
-    Math.random().toString(36).slice(2) + "." + extension;
+  const path=safeSlug+"/"+Date.now()+"-"+
+    Math.random().toString(36).slice(2)+"."+extension;
 
-  const {error} = await db.storage
-    .from("client-photos")
-    .upload(path,file,{
+  const {error}=await db.storage.from("client-photos").upload(
+    path,file,{
       contentType:file.type,
       cacheControl:"3600",
       upsert:false
-    });
+    }
+  );
 
-  if(error) throw error;
+  if(error)throw error;
 
-  const {data} = db.storage
-    .from("client-photos")
-    .getPublicUrl(path);
+  const {data}=db.storage.from("client-photos").getPublicUrl(path);
 
   return data.publicUrl;
 }
@@ -317,33 +323,33 @@ async function saveClient(){
   try{
     setStatus("Enregistrement en cours...");
 
-    const id = el("client_id").value;
-    const slug = el("slug").value.trim();
+    const id=el("client_id").value;
+    const slug=el("slug").value.trim();
 
-    if(!el("full_name").value.trim() || !slug){
+    if(!el("full_name").value.trim()||!slug){
       setStatus("Veuillez remplir le nom et le lien personnalisé.");
       return;
     }
 
-    const record = {};
+    const record={};
 
     fields.forEach(f=>{
-      record[f] = el(f).value.trim();
+      record[f]=el(f).value.trim();
     });
 
     colorFields.forEach(f=>{
-      record[f] = el(f).value;
+      record[f]=el(f).value || defaultColors[f];
     });
 
-    record.slug = slug;
-    record.is_published = el("is_published").checked;
+    record.slug=slug;
+    record.is_published=el("is_published").checked;
 
-    const file = el("photo_file").files[0];
+    const file=el("photo_file").files[0];
 
     if(file){
       setStatus("Téléchargement de la photo...");
-      record.photo_url = await uploadPhoto(file,slug);
-      el("photo_url").value = record.photo_url;
+      record.photo_url=await uploadPhoto(file,slug);
+      el("photo_url").value=record.photo_url;
     }
 
     setStatus("Sauvegarde de la carte...");
@@ -351,110 +357,134 @@ async function saveClient(){
     let result;
 
     if(id){
-      result = await db.from("clients").update(record).eq("id",id);
+      result=await db.from("clients").update(record).eq("id",id);
     }else{
-      result = await db.from("clients").insert([record]);
+      result=await db.from("clients").insert([record]);
     }
 
-    if(result.error) throw result.error;
+    if(result.error)throw result.error;
 
     setStatus("Carte enregistrée avec succès !");
+
     newCard();
     await loadClients();
 
   }catch(error){
-    setStatus("Erreur : " + error.message);
+    setStatus("Erreur : "+error.message);
   }
 }
 
 async function loadClients(){
-  el("clientsList").textContent = "Chargement...";
+  el("clientsList").textContent="Chargement...";
 
-  const {data,error} = await db.from("clients")
+  const {data,error}=await db.from("clients")
     .select("*")
     .order("created_at",{ascending:false});
 
   if(error){
-    el("clientsList").textContent = "Erreur : " + error.message;
+    el("clientsList").textContent="Erreur : "+error.message;
     return;
   }
 
-  if(!data || data.length === 0){
-    el("clientsList").textContent = "Aucun client pour le moment.";
+  if(!data||data.length===0){
+    el("clientsList").textContent="Aucun client pour le moment.";
     return;
   }
 
-  el("clientsList").innerHTML = "";
+  el("clientsList").innerHTML="";
 
   data.forEach(client=>{
-    const url = window.location.origin +
-      window.location.pathname.replace("admin.html","") +
-      "?id=" + encodeURIComponent(client.slug);
+    const url=window.location.origin+
+      window.location.pathname.replace("admin.html","")+
+      "?id="+encodeURIComponent(client.slug);
 
-    const div = document.createElement("div");
-    div.className = "client";
+    const div=document.createElement("div");
+    div.className="client";
 
-    const title = document.createElement("strong");
-    title.textContent = client.full_name || "Sans nom";
+    const title=document.createElement("strong");
+    title.textContent=client.full_name||"Sans nom";
 
-    const details = document.createElement("div");
-    details.innerHTML = "<small></small>";
-    details.querySelector("small").textContent =
-      " — " + (client.business_name || "") +
-      " | " + (client.is_published ? "Publié" : "Non publié");
+    const details=document.createElement("div");
+    const small=document.createElement("small");
 
-    const link = document.createElement("p");
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.target = "_blank";
-    anchor.textContent = "Ouvrir la carte";
-    anchor.style.color = "#d5ad55";
+    small.textContent=" — "+(client.business_name||"")+
+      " | "+(client.is_published?"Publié":"Non publié");
+
+    details.appendChild(small);
+
+    const link=document.createElement("p");
+    const anchor=document.createElement("a");
+    anchor.href=url;
+    anchor.target="_blank";
+    anchor.textContent="Ouvrir la carte";
+    anchor.style.color="#d5ad55";
     link.appendChild(anchor);
 
-    const edit = document.createElement("button");
-    edit.textContent = "Modifier";
-    edit.onclick = ()=>editClient(client);
+    const edit=document.createElement("button");
+    edit.textContent="Modifier";
+    edit.onclick=()=>editClient(client);
 
-    const qr = document.createElement("button");
-    qr.textContent = "QR Code";
-    qr.onclick = ()=>showQR(url);
+    const qr=document.createElement("button");
+    qr.textContent="QR Code";
+    qr.onclick=()=>showQR(url);
 
-    const del = document.createElement("button");
-    del.textContent = "Supprimer";
-    del.className = "danger";
-    del.onclick = ()=>deleteClient(client.id);
+    const del=document.createElement("button");
+    del.textContent="Supprimer";
+    del.className="danger";
+    del.onclick=()=>deleteClient(client.id);
 
     div.append(title,details,link,edit,qr,del);
     el("clientsList").appendChild(div);
   });
 }
 
-function editClient(client){
-  el("client_id").value = client.id;
+/* FIX : recharger la fiche directement depuis Supabase */
+async function editClient(client){
+  setStatus("Chargement des données du client...");
+
+  const {data,error}=await db
+    .from("clients")
+    .select("*")
+    .eq("id",client.id)
+    .single();
+
+  if(error){
+    setStatus("Erreur : "+error.message);
+    return;
+  }
+
+  el("client_id").value=data.id;
 
   fields.forEach(f=>{
-    el(f).value = client[f] || "";
+    el(f).value=data[f]??"";
   });
 
   colorFields.forEach(f=>{
-    el(f).value = client[f] || defaultColors[f];
+    const value=data[f];
+
+    el(f).value=(
+      typeof value==="string" &&
+      /^#[0-9a-fA-F]{6}$/.test(value)
+    )?value:defaultColors[f];
   });
 
-  el("photo_file").value = "";
-  el("is_published").checked = !!client.is_published;
-  el("formTitle").textContent = "Modifier la carte";
+  el("photo_file").value="";
+  el("is_published").checked=!!data.is_published;
 
-  setStatus("Vous modifiez : " + client.full_name);
+  el("formTitle").textContent="Modifier la carte";
+
+  setStatus("Vous modifiez : "+data.full_name);
+
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
 async function deleteClient(id){
-  if(!confirm("Voulez-vous vraiment supprimer cette carte ?")) return;
+  if(!confirm("Voulez-vous vraiment supprimer cette carte ?"))return;
 
-  const {error} = await db.from("clients").delete().eq("id",id);
+  const {error}=await db.from("clients").delete().eq("id",id);
 
   if(error){
-    alert("Erreur : " + error.message);
+    alert("Erreur : "+error.message);
     return;
   }
 
@@ -463,9 +493,9 @@ async function deleteClient(id){
 }
 
 function showQR(url){
-  currentQR = url;
-  el("qrcode").innerHTML = "";
-  el("qrLink").textContent = url;
+  currentQR=url;
+  el("qrcode").innerHTML="";
+  el("qrLink").textContent=url;
 
   new QRCode(el("qrcode"),{
     text:url,
@@ -474,19 +504,19 @@ function showQR(url){
     correctLevel:QRCode.CorrectLevel.H
   });
 
-  el("qrModal").style.display = "flex";
+  el("qrModal").style.display="flex";
 }
 
 function downloadQR(){
-  const img = el("qrcode").querySelector("img");
-  const canvas = el("qrcode").querySelector("canvas");
+  const img=el("qrcode").querySelector("img");
+  const canvas=el("qrcode").querySelector("canvas");
 
-  let dataUrl = "";
+  let dataUrl="";
 
-  if(img && img.src){
-    dataUrl = img.src;
+  if(img&&img.src){
+    dataUrl=img.src;
   }else if(canvas){
-    dataUrl = canvas.toDataURL("image/png");
+    dataUrl=canvas.toDataURL("image/png");
   }
 
   if(!dataUrl){
@@ -494,19 +524,27 @@ function downloadQR(){
     return;
   }
 
-  const a = document.createElement("a");
-  a.href = dataUrl;
-  a.download = "QR-Code.png";
+  const a=document.createElement("a");
+  a.href=dataUrl;
+  a.download="QR-Code.png";
   a.click();
 }
 
 function closeQR(){
-  el("qrModal").style.display = "none";
+  el("qrModal").style.display="none";
 }
 
-db.auth.getSession().then(({data})=>{
-  if(data.session) showApp();
+db.auth.getSession().then(({data,error})=>{
+  if(error){
+    el("loginStatus").textContent=error.message;
+    return;
+  }
+
+  if(data.session){
+    showApp();
+  }
 });
 </script>
+
 </body>
 </html>
