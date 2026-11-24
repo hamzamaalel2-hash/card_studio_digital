@@ -1,164 +1,162 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Digital Business Card</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#050505;
+  --card:#101010;
+  --border:#D4AF37;
+  --button:#202020;
+  --text:#FFFFFF;
+  --title:#F1D477;
+  --accent:#D4AF37;
+  --button-text:#E9CD75;
 }
 
-body {
-  min-height: 100vh;
-  padding: 30px 15px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background:
-    radial-gradient(circle at top, #29200b 0%, #111 38%, #050505 100%);
-  font-family: Arial, sans-serif;
-  color: #fff;
+body{
+  min-height:100vh;
+  padding:30px 15px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:var(--bg);
+  font-family:Arial,sans-serif;
+  color:var(--text);
 }
 
-.card {
-  width: 100%;
-  max-width: 430px;
-  background: linear-gradient(145deg, #171717, #080808);
-  border: 1px solid #b99745;
-  border-radius: 22px;
-  padding: 18px;
-  text-align: center;
-  box-shadow:
-    0 0 15px rgba(212,175,55,.18),
-    0 20px 60px rgba(0,0,0,.7);
-  overflow: hidden;
-  position: relative;
+.card{
+  width:100%;
+  max-width:430px;
+  background:var(--card);
+  border:2px solid var(--border);
+  border-radius:22px;
+  padding:18px;
+  text-align:center;
+  box-shadow:0 15px 50px rgba(0,0,0,.35);
+  overflow:hidden;
+  position:relative;
 }
 
-.card::before {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  border: 1px solid rgba(212,175,55,.22);
-  border-radius: 17px;
-  pointer-events: none;
+.card::before{
+  content:"";
+  position:absolute;
+  inset:5px;
+  border:1px solid var(--accent);
+  border-radius:17px;
+  opacity:.35;
+  pointer-events:none;
 }
 
-.photo {
-  width: calc(100% + 36px);
-  height: 290px;
-  margin: -18px -18px 24px;
-  object-fit: cover;
-  display: none;
-  border-bottom: 2px solid #d4af37;
+.photo{
+  width:calc(100% + 36px);
+  height:290px;
+  margin:-18px -18px 24px;
+  object-fit:cover;
+  display:none;
+  border-bottom:2px solid var(--accent);
 }
 
-.name {
-  color: #f1d477;
-  font-size: 27px;
-  font-weight: bold;
-  margin-bottom: 9px;
-  letter-spacing: 1px;
-  overflow-wrap: anywhere;
+.name{
+  color:var(--title);
+  font-size:27px;
+  font-weight:bold;
+  margin-bottom:9px;
+  letter-spacing:1px;
+  overflow-wrap:anywhere;
 }
 
-.business {
-  color: #fff;
-  font-size: 17px;
-  margin-bottom: 7px;
-  overflow-wrap: anywhere;
+.business{
+  color:var(--text);
+  font-size:17px;
+  margin-bottom:7px;
+  overflow-wrap:anywhere;
 }
 
-.job {
-  color: #c7a957;
-  font-size: 14px;
-  margin-bottom: 25px;
-  overflow-wrap: anywhere;
+.job{
+  color:var(--accent);
+  font-size:14px;
+  margin-bottom:25px;
+  overflow-wrap:anywhere;
 }
 
-.gold-line {
-  width: 75px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #d4af37, transparent);
-  margin: 0 auto 23px;
+.gold-line{
+  width:75px;
+  height:2px;
+  background:var(--accent);
+  margin:0 auto 23px;
 }
 
-.buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 11px;
+.buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:11px;
 }
 
-.btn {
-  min-height: 48px;
-  padding: 13px 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 7px;
-  text-decoration: none;
-  color: #e9cd75;
-  background: linear-gradient(145deg, #202020, #101010);
-  border: 1px solid #a98a38;
-  border-radius: 11px;
-  font-size: 13px;
-  font-weight: bold;
-  transition: .25s ease;
-  overflow-wrap: anywhere;
+.btn{
+  min-height:48px;
+  padding:13px 8px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:7px;
+  text-decoration:none;
+  color:var(--button-text);
+  background:var(--button);
+  border:1px solid var(--border);
+  border-radius:11px;
+  font-size:13px;
+  font-weight:bold;
+  transition:.25s ease;
+  overflow-wrap:anywhere;
 }
 
-.btn:hover {
-  color: #080808;
-  background: linear-gradient(135deg, #f4dc8b, #b58a25);
-  box-shadow: 0 0 15px rgba(212,175,55,.35);
-  transform: translateY(-3px);
+.btn:hover{
+  filter:brightness(1.2);
+  transform:translateY(-3px);
 }
 
-.btn:active {
-  transform: scale(.96);
+.btn:active{transform:scale(.96)}
+
+.contact{
+  width:100%;
+  margin-top:20px;
+  padding:15px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--accent);
+  color:var(--button-text);
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:.25s;
 }
 
-.contact {
-  width: 100%;
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #d4af37;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #d9b957, #a77e20);
-  color: #080808;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: .25s;
+.contact:hover{filter:brightness(1.15);transform:translateY(-2px)}
+
+.footer{
+  margin-top:24px;
+  color:var(--accent);
+  font-size:10px;
+  letter-spacing:3px;
 }
 
-.contact:hover {
-  filter: brightness(1.15);
-  transform: translateY(-2px);
+#message{
+  padding:35px 10px;
+  color:var(--title);
+  text-align:center;
 }
 
-.footer {
-  margin-top: 24px;
-  color: #8c763d;
-  font-size: 10px;
-  letter-spacing: 3px;
-}
-
-#message {
-  padding: 35px 10px;
-  color: #e9cd75;
-  text-align: center;
-}
-
-@media (max-width: 360px) {
-  .buttons { grid-template-columns: 1fr; }
-  .photo { height: 240px; }
+@media(max-width:360px){
+  .buttons{grid-template-columns:1fr}
+  .photo{height:240px}
 }
 </style>
 </head>
@@ -166,145 +164,170 @@ body {
 <body>
 
 <div class="card" id="card" style="display:none">
-
   <img id="photo" class="photo" alt="Photo">
-
   <div class="name" id="full_name"></div>
   <div class="business" id="business_name"></div>
   <div class="job" id="job_title"></div>
-
   <div class="gold-line"></div>
-
   <div class="buttons" id="buttons"></div>
-
   <button class="contact" id="saveContact" style="display:none">
     👤 Ajouter aux contacts
   </button>
-
   <div class="footer">DIGITAL BUSINESS CARD</div>
 </div>
 
 <div id="message">Chargement de la carte...</div>
 
 <script>
-const SUPABASE_URL = "https://qgrrgvqeveqcusvzaump.supabase.co";
-const SUPABASE_KEY = "sb_publishable_MZaIjhV4gLUkOV4E9iZb0w_Y12deY0J";
+const SUPABASE_URL="https://qgrrgvqeveqcusvzaump.supabase.co";
+const SUPABASE_KEY="sb_publishable_MZaIjhV4gLUkOV4E9iZb0w_Y12deY0J";
 
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let clientData = null;
+let clientData=null;
 
-function addButton(label, icon, url) {
-  if (!url) return;
+const defaultColors={
+  background_color:"#050505",
+  card_color:"#101010",
+  border_color:"#D4AF37",
+  button_color:"#202020",
+  text_color:"#FFFFFF",
+  title_color:"#F1D477",
+  accent_color:"#D4AF37",
+  button_text_color:"#E9CD75"
+};
 
-  const a = document.createElement("a");
-  a.className = "btn";
-  a.href = url;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
-  a.textContent = icon + " " + label;
+function applyColors(data){
+  const root=document.documentElement;
+
+  const variables={
+    background_color:"--bg",
+    card_color:"--card",
+    border_color:"--border",
+    button_color:"--button",
+    text_color:"--text",
+    title_color:"--title",
+    accent_color:"--accent",
+    button_text_color:"--button-text"
+  };
+
+  Object.entries(variables).forEach(([field,variable])=>{
+    const value=data[field] || defaultColors[field];
+
+    if(/^#[0-9A-Fa-f]{6}$/.test(value)){
+      root.style.setProperty(variable,value);
+    }else{
+      root.style.setProperty(variable,defaultColors[field]);
+    }
+  });
+}
+
+function addButton(label,icon,url){
+  if(!url)return;
+
+  const a=document.createElement("a");
+  a.className="btn";
+  a.href=url;
+  a.target="_blank";
+  a.rel="noopener noreferrer";
+  a.textContent=icon+" "+label;
 
   document.getElementById("buttons").appendChild(a);
 }
 
-function phoneLink(value) {
-  return value ? "tel:" + value.replace(/[^\d+]/g, "") : "";
+function phoneLink(value){
+  return value?"tel:"+value.replace(/[^\d+]/g,""):"";
 }
 
-function whatsappLink(value) {
-  if (!value) return "";
-  const number = value.replace(/\D/g, "");
-  return number ? "https://wa.me/" + number : "";
+function whatsappLink(value){
+  if(!value)return "";
+  const number=value.replace(/\D/g,"");
+  return number?"https://wa.me/"+number:"";
 }
 
-function makeContact() {
-  if (!clientData) return;
+function makeContact(){
+  if(!clientData)return;
 
-  const d = clientData;
-  const lines = [
+  const d=clientData;
+  const lines=[
     "BEGIN:VCARD",
     "VERSION:3.0",
-    "FN:" + (d.full_name || ""),
-    "ORG:" + (d.business_name || ""),
-    "TITLE:" + (d.job_title || ""),
-    d.phone ? "TEL;TYPE=CELL:" + d.phone : "",
-    d.email ? "EMAIL:" + d.email : "",
-    d.website ? "URL:" + d.website : "",
+    "FN:"+ (d.full_name||""),
+    "ORG:"+ (d.business_name||""),
+    "TITLE:"+ (d.job_title||""),
+    d.phone?"TEL;TYPE=CELL:"+d.phone:"",
+    d.email?"EMAIL:"+d.email:"",
+    d.website?"URL:"+d.website:"",
     "END:VCARD"
   ].filter(Boolean);
 
-  const blob = new Blob(
+  const blob=new Blob(
     [lines.join("\r\n")],
-    { type: "text/vcard;charset=utf-8" }
+    {type:"text/vcard;charset=utf-8"}
   );
 
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = (d.full_name || "contact") + ".vcf";
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=(d.full_name||"contact")+".vcf";
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
-async function loadCard() {
-  const slug = new URLSearchParams(window.location.search).get("id");
+async function loadCard(){
+  const slug=new URLSearchParams(window.location.search).get("id");
 
-  if (!slug) {
-    document.getElementById("message").textContent =
-      "Lien de carte invalide.";
+  if(!slug){
+    document.getElementById("message").textContent="Lien de carte invalide.";
     return;
   }
 
-  const { data, error } = await db
+  const {data,error}=await db
     .from("clients")
     .select("*")
-    .eq("slug", slug)
-    .eq("is_published", true)
+    .eq("slug",slug)
+    .eq("is_published",true)
     .maybeSingle();
 
-  if (error || !data) {
-    document.getElementById("message").textContent =
+  if(error||!data){
+    console.error(error);
+    document.getElementById("message").textContent=
       "Carte introuvable ou non publiée.";
     return;
   }
 
-  clientData = data;
+  clientData=data;
 
-  document.getElementById("full_name").textContent =
-    data.full_name || "";
+  // Appliquer les couleurs propres à ce client
+  applyColors(data);
 
-  document.getElementById("business_name").textContent =
-    data.business_name || "";
+  document.getElementById("full_name").textContent=data.full_name||"";
+  document.getElementById("business_name").textContent=data.business_name||"";
+  document.getElementById("job_title").textContent=data.job_title||"";
 
-  document.getElementById("job_title").textContent =
-    data.job_title || "";
-
-  if (data.photo_url) {
-    const photo = document.getElementById("photo");
-    photo.src = data.photo_url;
-    photo.style.display = "block";
+  if(data.photo_url){
+    const photo=document.getElementById("photo");
+    photo.src=data.photo_url;
+    photo.style.display="block";
   }
 
-  addButton("Téléphone", "📞", phoneLink(data.phone));
-  addButton("WhatsApp", "🟢", whatsappLink(data.whatsapp));
-  addButton("Instagram", "📸", data.instagram);
-  addButton("Facebook", "🔵", data.facebook);
-  addButton("TikTok", "🎵", data.tiktok);
-  addButton("Localisation", "📍", data.maps_url);
-  addButton("Google Review", "⭐", data.review_url);
-  addButton("Email", "✉️", data.email ? "mailto:" + data.email : "");
-  addButton("Site Web", "🌐", data.website);
+  addButton("Téléphone","📞",phoneLink(data.phone));
+  addButton("WhatsApp","🟢",whatsappLink(data.whatsapp));
+  addButton("Instagram","📸",data.instagram);
+  addButton("Facebook","🔵",data.facebook);
+  addButton("TikTok","🎵",data.tiktok);
+  addButton("Localisation","📍",data.maps_url);
+  addButton("Google Review","⭐",data.review_url);
+  addButton("Email","✉️",data.email?"mailto:"+data.email:"");
+  addButton("Site Web","🌐",data.website);
 
-  if (
-    data.full_name || data.business_name || data.phone ||
-    data.email || data.website
-  ) {
-    document.getElementById("saveContact").style.display = "block";
-    document.getElementById("saveContact").onclick = makeContact;
+  if(data.full_name||data.business_name||data.phone||data.email||data.website){
+    document.getElementById("saveContact").style.display="block";
+    document.getElementById("saveContact").onclick=makeContact;
   }
 
-  document.getElementById("message").style.display = "none";
-  document.getElementById("card").style.display = "block";
+  document.getElementById("message").style.display="none";
+  document.getElementById("card").style.display="block";
 }
 
 loadCard();
